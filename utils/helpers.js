@@ -31,8 +31,11 @@ const getAllUsers = async (app) => {
   return [];
 }
 
-const chooseActiveUser = async (app, userList, needsShuffle = true) => {
-  if (userList.length == 0) {
+const chooseActiveUsers = async (app, userList, count = 1, needsShuffle = true) => {
+  if (count === 0) {
+    return [];
+  }
+  if (userList.length === 0) {
     console.error('No user is active at the moment');
     return [];
   }
@@ -41,7 +44,7 @@ const chooseActiveUser = async (app, userList, needsShuffle = true) => {
   }
   user = userList.pop()
 
-  // Check if user is present
+  // Check if user is active or not
   try {
     const result = await app.client.users.getPresence({
       token: process.env.SLACK_BOT_TOKEN,
@@ -49,49 +52,43 @@ const chooseActiveUser = async (app, userList, needsShuffle = true) => {
     });
     
     if (result.presence == 'active') {
-      return user;
+      return [user].concat(await chooseActiveUsers(app, userList, count - 1, false));
     }
   } catch (error) {
     console.error(error);
   }
 
-  return chooseActiveUser(app, userList, false);
+  return await chooseActiveUsers(app, userList, count, false);
 }
 
-const postZoomLinkTo = async (app, userA, userB, link) => {
-    try {
-      const result = await app.client.chat.postMessage({
-        token: process.env.SLACK_BOT_TOKEN,
-        channel: userA,
-        text: `Here is your roulette with *${userB.real_name}*: ${link}`
-      });
-      console.log(result);
-    }
-    catch (error) {
-      console.error(error);
-    }
-    try {
-      const result = await app.client.chat.postMessage({
-        token: process.env.SLACK_BOT_TOKEN,
-        channel: userB,
-        text: `Here is your roulette with *${userA.real_name}*: ${link}`
-      });
-      console.log(result);
-    }
-    catch (error) {
-      console.error(error);
+const postZoomLinkTo = async (app, userList, link) => {
+    for (var user of userList) {
+      const pairedNames = userList.filter(u => u.id !== user.id).map(u => u.real_name).join(', ')
+      try {
+        // const result = await app.client.chat.postMessage({
+        //   token: process.env.SLACK_BOT_TOKEN,
+        //   channel: user.id,
+        //   text: `Ready for your chat with *${pairedNames}*? See you there: <${link}> !`
+        // });
+        console.log(`🗯 Ready for your chat with *${pairedNames}*? See you there: <${link}> !`)
+        //console.log(result);
+      }
+      catch (error) {
+        console.error(error);
+      }
     }
 }
 
-const alertUser = async (app, channel, user) => {
+const alertUser = async (app, channel, user, text) => {
     try {
-      const result = await app.client.chat.postEphemeral({
-        token: process.env.SLACK_BOT_TOKEN,
-        user: user,
-        channel: channel,
-        text: `Vous avez atteint la limite de création automatique de 100 meetings / jour`
-      });
-      console.log(result);
+      // const result = await app.client.chat.postEphemeral({
+      //   token: process.env.SLACK_BOT_TOKEN,
+      //   user: user,
+      //   channel: channel,
+      //   text: text
+      // });
+      console.log(`🗯 ALERT to ${user} in ${channel}: ${text}`)
+      //console.log(result);
     }
     catch (error) {
       console.error(error);
@@ -100,6 +97,6 @@ const alertUser = async (app, channel, user) => {
 
 module.exports = {
   getAllUsers,
-  chooseActiveUser,
+  chooseActiveUsers,
   postZoomLinkTo
 }
