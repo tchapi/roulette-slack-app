@@ -10,6 +10,10 @@ console.log("🛠 Config read from .env file")
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
   signingSecret: process.env.SLACK_SIGNING_SECRET
+  // endpoints: { // Just for reference since there is no documentation for that
+  //   events: '/slack/events',
+  //   commands: '/slack/events' 
+  // }
 });
 
 const payload = {
@@ -42,9 +46,11 @@ getAllUsers(app).then((users) => {
   console.log(`👪 We have ${users.length} users in the STIM workspace`)
   //console.log(users.map(u => u.real_name))
 
-  app.command('roulette', async ({ ack, payload }) => {
+  app.command('roulette', async ({ command, ack, payload }) => {
     ack();
 
+    console.log(command);
+    
     // Find requesting user
     const requestingUser = users.find(u => u.id === payload.user);
     console.log(`⏩ Received a /roulette command from ${requestingUser.real_name}`);
