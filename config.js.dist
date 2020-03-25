@@ -1,0 +1,12 @@
+const excludedAccounts = [
+  'USLACKBOT'
+]
+
+const emails = {
+  'UXXXXXXXX': 'stim_email_prefix',
+}
+
+module.exports = {
+  excludedAccounts,
+  emails
+}
