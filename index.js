@@ -21,7 +21,7 @@ const payload = {
     exp: ((new Date()).getTime() + 5000)
 };
 const zoomToken = jwt.sign(payload, process.env.ZOOM_API_SEC);
-console.log(`🔐 Zoom token created: ${zoomToken}`)
+console.log(`🔐 Zoom token created`)
 
 const meetingOptions = (email) => ({
   method: 'POST',
@@ -50,7 +50,7 @@ getAllUsers(app).then((users) => {
     ack();
 
     console.log(command);
-    
+
     // Find requesting user
     const requestingUser = users.find(u => u.id === payload.user);
     console.log(`⏩ Received a /roulette command from ${requestingUser.real_name}`);
