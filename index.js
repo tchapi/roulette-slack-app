@@ -31,7 +31,7 @@ const meetingOptions = (email) => ({
     authorization: 'Bearer ' + zoomToken
   },
   body: {
-    topic: 'Stim Roulette',
+    topic: process.env.ZOOM_TOPIC,
     type: 1, // Instant meeting
     settings: {
       audio: 'voip',
@@ -43,7 +43,7 @@ const meetingOptions = (email) => ({
 });
 
 getAllUsers(app).then((users) => {
-  console.log(`👪 We have ${users.length} users in the STIM workspace`)
+  console.log(`👪 We have ${users.length} users in the workspace`)
   //console.log(users.map(u => u.real_name))
 
   app.command('roulette', async ({ command, ack, payload }) => {
@@ -125,5 +125,5 @@ getAllUsers(app).then((users) => {
 (async () => {
   const port = process.env.PORT || 4000
   await app.start(port);
-  console.log(`⚡️ STIM Slack app is running on port ${port}`);
+  console.log(`⚡️ Roulette Slack app is running on port ${port}`);
 })();

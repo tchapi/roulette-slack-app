@@ -3,7 +3,7 @@ const excludedAccounts = [
 ]
 
 const emails = {
-  'UXXXXXXXX': 'stim_email_prefix',
+  'UXXXXXXXX': 'user@domain.com',
 }
 
 module.exports = {

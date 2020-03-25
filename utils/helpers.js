@@ -22,7 +22,7 @@ const getAllUsers = async (app) => {
         return {
           id: u.id,
           real_name: (u.profile.real_name || u.real_name).toLowerCase().replace('.', ' ').replace(/(^|\s)\S/g, l => l.toUpperCase()),
-          email: (emails[u.id] || u.name) + '@wearestim.com'
+          email: emails[u.id]
         }
       });
   } catch (error) {
@@ -51,7 +51,7 @@ const chooseActiveUsers = async (app, userList, count = 1, needsShuffle = true) 
       user: user.id
     });
     
-    if (result.presence == 'active') {
+    if (result.presence === 'active') {
       return [user].concat(await chooseActiveUsers(app, userList, count - 1, false));
     }
   } catch (error) {
