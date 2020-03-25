@@ -83,6 +83,21 @@ const postZoomLinkTo = async (app, userA, userB, link) => {
     }
 }
 
+const alertUser = async (app, channel, user) => {
+    try {
+      const result = await app.client.chat.postEphemeral({
+        token: process.env.SLACK_BOT_TOKEN,
+        user: user,
+        channel: channel,
+        text: `Vous avez atteint la limite de création automatique de 100 meetings / jour`
+      });
+      console.log(result);
+    }
+    catch (error) {
+      console.error(error);
+    }
+}
+
 module.exports = {
   getAllUsers,
   chooseActiveUser,

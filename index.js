@@ -2,7 +2,7 @@ const request = require('request');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken')
 const { App } = require('@slack/bolt');
-const { getAllUsers, chooseActiveUser, postZoomLinkTo } = require('./utils/helpers');
+const { getAllUsers, chooseActiveUser, postZoomLinkTo, alertUser } = require('./utils/helpers');
 
 dotenv.config()
 console.log("🛠 Config read from .env file")
@@ -56,7 +56,12 @@ getAllUsers(app).then((users) => {
 
     // Create a meeting for them
     request(meetingOptions(requestingUser.email), async (error, response, body) => {
-      if (error) throw new Error(error);
+      if (error) {
+        // We likely have reached the 100 meetings / day limit,
+        // Tell the requester
+        alertUser(app, payload.channel, payload.user)
+        return
+      }
 
       console.log(body);
 
