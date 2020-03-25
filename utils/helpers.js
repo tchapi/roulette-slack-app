@@ -19,7 +19,11 @@ const getAllUsers = async (app) => {
     return result.members
       .filter(u => !excludedAccounts.includes(u.id) && !u.deleted && !u.is_bot && !u.is_restricted)
       .map((u) => {
-        return { id: u.id, real_name: u.profile.real_name || u.real_name, email: (emails[u.id] || u.name) + '@wearestim.com' }
+        return {
+          id: u.id,
+          real_name: (u.profile.real_name || u.real_name).toLowerCase().replace('.', ' ').replace(/(^|\s)\S/g, l => l.toUpperCase()),
+          email: (emails[u.id] || u.name) + '@wearestim.com'
+        }
       });
   } catch (error) {
     console.error(error);
@@ -58,7 +62,7 @@ const postZoomLinkTo = async (app, userA, userB, link) => {
     try {
       const result = await app.client.chat.postMessage({
         token: process.env.SLACK_BOT_TOKEN,
-        channel: userA.id,
+        channel: userA,
         text: `Here is your roulette with *${userB.real_name}*: ${link}`
       });
       console.log(result);
@@ -69,7 +73,7 @@ const postZoomLinkTo = async (app, userA, userB, link) => {
     try {
       const result = await app.client.chat.postMessage({
         token: process.env.SLACK_BOT_TOKEN,
-        channel: userB.id,
+        channel: userB,
         text: `Here is your roulette with *${userA.real_name}*: ${link}`
       });
       console.log(result);

@@ -40,10 +40,10 @@ const meetingOptions = (email) => ({
 
 getAllUsers(app).then((users) => {
   console.log(`👪 We have ${users.length} users :`)
-  console.log(users)
+  console.log(users.map(u => u.real_name))
 
   // Listen for a slash command
-  app.command('roulette', async ({ ack, context, payload }) => {
+  app.command('roulette', async ({ ack, payload }) => {
     ack();
 
     // Find requesting user
