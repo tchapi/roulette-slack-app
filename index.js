@@ -70,7 +70,7 @@ getAllUsers(app).then((users) => {
     let randomUsers = []
     if (payload.text === "duo") {
       // Choose all active users of the channel
-      randomUsers = filterUsersByChannel(app, users, payload.channel_id)
+      randomUsers = await filterUsersByChannel(app, users, payload.channel_id)
     } else {
       randomUsers = [requestingUser].concat(await chooseActiveUsers(app, users, 1, true))
     }
