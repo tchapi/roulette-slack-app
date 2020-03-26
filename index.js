@@ -85,7 +85,7 @@ getAllUsers(app).then((users) => {
 
     if (randomUsers.length < 2) {
       respond({
-        text: 'Il n\'a pas assez d\'utilisateurs actifs. Tentez plus tard!',
+        text: 'Not enough active users. Try again later!',
         response_type: 'ephemeral'
       });
       return
