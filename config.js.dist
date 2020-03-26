@@ -6,7 +6,10 @@ const emails = {
   'UXXXXXXXX': 'user@domain.com',
 }
 
+const includeRestricted = false
+
 module.exports = {
   excludedAccounts,
-  emails
+  emails,
+  includeRestricted
 }

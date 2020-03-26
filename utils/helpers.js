@@ -1,7 +1,7 @@
 const dotenv = require('dotenv');
 dotenv.config()
 
-const { excludedAccounts, emails } = require('../config')
+const { excludedAccounts, emails, includeRestricted } = require('../config')
 
 const shuffle = (array) => {
   for (let i = array.length - 1; i > 0; i--) {
@@ -17,7 +17,7 @@ const getAllUsers = async (app) => {
     });
 
     return result.members
-      .filter(u => !excludedAccounts.includes(u.id) && !u.deleted && !u.is_bot && !u.is_restricted)
+      .filter(u => !excludedAccounts.includes(u.id) && !u.deleted && !u.is_bot && (!u.is_restricted || includeRestricted) )
       .map((u) => {
         return {
           id: u.id,
@@ -70,7 +70,7 @@ const postZoomLinkTo = async (app, userList, link) => {
         //   channel: user.id,
         //   text: `Ready for your chat with *${pairedNames}*? See you there: <${link}> !`
         // });
-        console.log(`🗯 Ready for your chat with *${pairedNames}*? See you there: <${link}> !`)
+        console.log(`🗯  Ready for your chat with *${pairedNames}*? See you there: <${link}> !`)
         //console.log(result);
       }
       catch (error) {
@@ -87,7 +87,7 @@ const alertUser = async (app, channel, user, text) => {
         channel: channel,
         text: text
       });
-      console.log(`🗯 ALERT to ${user} in ${channel}: ${text}`)
+      console.log(`🗯  ALERT to ${user} in ${channel}: ${text}`)
       //console.log(result);
     }
     catch (error) {
@@ -98,5 +98,6 @@ const alertUser = async (app, channel, user, text) => {
 module.exports = {
   getAllUsers,
   chooseActiveUsers,
-  postZoomLinkTo
+  postZoomLinkTo,
+  alertUser
 }

@@ -59,18 +59,29 @@ getAllUsers(app).then((users) => {
 
     // Find requesting user
     const requestingUser = users.find(u => u.id === payload.user_id);
-    console.log(`⏩ Received a /roulette command from ${requestingUser.real_name}`);
 
-    // Choose one random active user
-    if (payload.text === "duo") {
-      const randomUsers = await chooseActiveUsers(app, users, 4, true)
-    } else {
-      const randomUsers = [requestingUser, await chooseActiveUsers(app, users, 1, true)]
+    if (!requestingUser) {
+      alertUser(app, payload.channel_id, payload.user_id, 'You are not allowed to run this command.')
     }
 
-    if (randomUsers.length === 1) {
-      alertUser(app, payload.channel_id, payload.user_id, 'Il n\'a qu\'un seul utilisateur actif. Tentez plus tard!')
-    } else if (randomUsers.length === 4) {
+    console.log(`⏩ Received a /roulette command from ${requestingUser.real_name} (${payload.user_id}) in ${payload.channel_name} (${payload.channel_id})`);
+
+    // Choose one random active user
+    let randomUsers = []
+    if (payload.text === "duo") {
+      randomUsers = await chooseActiveUsers(app, users, 4, true)
+    } else {
+      randomUsers = [requestingUser, await chooseActiveUsers(app, users, 1, true)]
+    }
+
+    if (randomUsers.length < 2) {
+      alertUser(app, payload.channel_id, payload.user_id, 'Il n\'a pas assez d\'utilisateurs actifs. Tentez plus tard!')
+      return
+    }
+
+    alertUser(app, payload.channel_id, payload.user_id, `⏯ Creating random roulette between ${randomUsers.map(u => u.real_name).join(', ')}`)
+
+    if (randomUsers.length === 4) {
       // Create a meeting for them - First couple
       request(meetingOptions(randomUsers[0].email), async (error, response, body) => {
         if (error) {
@@ -107,8 +118,6 @@ getAllUsers(app).then((users) => {
         console.log(`✅ Sent link ${body.join_url} to ${randomUsers.map(u => u.real_name).join(', ')}`);
       });
     }
-
-    alertUser(app, payload.channel_id, payload.user_id, `Random roulette created between ${randomUsers.map(u => u.real_name).join(', ')}`)
 
   });
 });
