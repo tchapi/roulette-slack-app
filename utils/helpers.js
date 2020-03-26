@@ -37,9 +37,9 @@ const filterUsersByChannel = async (app, userList, channel) => {
       token: process.env.SLACK_BOT_TOKEN,
       channel: channel
     });
-    
+
     // TODO : check the presence ?
-    return userList.filter(u => u.id in result.members)
+    return userList.filter(u => result.members.includes(u.id))
   } catch (error) {
     console.error(error);
   }

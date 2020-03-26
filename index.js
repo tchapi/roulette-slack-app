@@ -91,7 +91,7 @@ getAllUsers(app).then((users) => {
       userA = randomUsers.pop()
       userB = randomUsers.pop()
       request(meetingOptions(userA.email), async (error, response, body) => {
-        if (!('join_url' in body) && (message in body)) {
+        if (!('join_url' in body) && ('message' in body)) {
           respond({
             text: `There was a problem with the Zoom API: ${body.message || error}`,
             response_type: 'ephemeral'
@@ -107,7 +107,7 @@ getAllUsers(app).then((users) => {
 
     // finally, remaining duo or trio
     request(meetingOptions(randomUsers[0].email), async (error, response, body) => {
-      if (!('join_url' in body) && (message in body)) {
+      if (!('join_url' in body) && ('message' in body)) {
         respond({
           text: `There was a problem with the Zoom API: ${body.message || error}`,
           response_type: 'ephemeral'
