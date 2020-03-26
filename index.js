@@ -86,6 +86,8 @@ getAllUsers(app).then((users) => {
     console.log(`⏯  Creating random roulette between ${randomUsers.map(u => u.real_name).join(', ')}.`);
 
     // Pair them 2 by 2
+    let userA = null
+    let userB = null
     while (randomUsers.length >= 4) {
       // Take two out of the users, create a meeting
       userA = randomUsers.pop()
@@ -96,6 +98,7 @@ getAllUsers(app).then((users) => {
             text: `There was a problem with the Zoom API: ${body.message || error}`,
             response_type: 'ephemeral'
           })
+          console.log(`🚫 There was a problem with the Zoom API: ${body.message || error}`)
           return
         }
 
@@ -112,6 +115,7 @@ getAllUsers(app).then((users) => {
           text: `There was a problem with the Zoom API: ${body.message || error}`,
           response_type: 'ephemeral'
         })
+        console.log(`🚫 There was a problem with the Zoom API: ${body.message || error}`)
         return
       }
 
