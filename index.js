@@ -1,7 +1,7 @@
 const request = require('request');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken')
-const { App } = require('@slack/bolt');
+const { App, LogLevel } = require('@slack/bolt');
 const { getAllUsers, chooseActiveUsers, postZoomLinkTo, alertUser } = require('./utils/helpers');
 
 dotenv.config()
@@ -9,7 +9,8 @@ console.log("🛠 Config read from .env file")
 
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
-  signingSecret: process.env.SLACK_SIGNING_SECRET
+  signingSecret: process.env.SLACK_SIGNING_SECRET,
+  logLevel: LogLevel.DEBUG,
   // endpoints: { // Just for reference since there is no documentation for that
   //   events: '/slack/events',
   //   commands: '/slack/events' 
@@ -40,6 +41,11 @@ const meetingOptions = (email) => ({
     }
   },
   json: true
+});
+
+app.error((error) => {
+  // Check the details of the error to handle cases where you should retry sending a message or stop the app
+  console.error(error);
 });
 
 getAllUsers(app).then((users) => {
