@@ -54,6 +54,13 @@ getAllUsers(app).then((users) => {
   app.command('/roulette', async ({ack, respond, payload }) => {
     ack();
 
+    if (payload.channel_name === 'privategroup') {
+      respond({
+        text: 'You are not allowed to run `/roulette` in a private group.',
+        response_type: 'ephemeral'
+      });
+      return
+    }
     // Find requesting user
     const requestingUser = users.find(u => u.id === payload.user_id);
 
@@ -62,6 +69,7 @@ getAllUsers(app).then((users) => {
         text: 'You are not allowed to run this command.',
         response_type: 'ephemeral'
       });
+      return
     }
 
     console.log(`⏩ Received a /roulette command from ${requestingUser.real_name} (${payload.user_id}) in ${payload.channel_name} (${payload.channel_id})`);
