@@ -31,12 +31,24 @@ const getAllUsers = async (app) => {
   return [];
 }
 
-const chooseActiveUsers = async (app, userList, count = 1, needsShuffle = true) => {
-  if (count === 0) {
-    return [];
+const filterUsersByChannel = async (app, userList, channel) => {
+  try {
+    const result = await app.client.conversations.members({
+      token: process.env.SLACK_BOT_TOKEN,
+      channel: channel
+    });
+    
+    // TODO : check the presence ?
+    return userList.filter(u => u.id in result.members)
+  } catch (error) {
+    console.error(error);
   }
-  if (userList.length === 0) {
-    console.error('No user is active at the moment');
+
+  return []
+}
+
+const chooseActiveUsers = async (app, userList, count = 1, needsShuffle = true) => {
+  if (count === 0 || userList.length === 0) {
     return [];
   }
   if (needsShuffle) {
@@ -71,7 +83,6 @@ const postZoomLinkTo = async (app, userList, link) => {
           text: `Ready for your chat with *${pairedNames}*? See you there: ${link}`
         });
         console.log(`🗯  ${user.real_name}: Ready for your chat with *${pairedNames}*? See you there: ${link}`)
-        //console.log(result);
       }
       catch (error) {
         console.error(error);
@@ -81,6 +92,7 @@ const postZoomLinkTo = async (app, userList, link) => {
 
 module.exports = {
   getAllUsers,
+  filterUsersByChannel,
   chooseActiveUsers,
   postZoomLinkTo
 }

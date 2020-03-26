@@ -2,10 +2,10 @@ const request = require('request');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken')
 const { App, LogLevel } = require('@slack/bolt');
-const { getAllUsers, chooseActiveUsers, postZoomLinkTo } = require('./utils/helpers');
+const { getAllUsers, filterUsersByChannel, chooseActiveUsers, postZoomLinkTo } = require('./utils/helpers');
 
 dotenv.config()
-console.log("🛠 Config read from .env file")
+console.log("🛠  Config read from .env file")
 
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
@@ -50,12 +50,9 @@ app.error((error) => {
 
 getAllUsers(app).then((users) => {
   console.log(`👪 We have ${users.length} users in the workspace`)
-  //console.log(users.map(u => u.real_name))
 
   app.command('/roulette', async ({ack, respond, payload }) => {
     ack();
-
-    const isDuo = (payload.text === "duo")
 
     // Find requesting user
     const requestingUser = users.find(u => u.id === payload.user_id);
@@ -72,7 +69,8 @@ getAllUsers(app).then((users) => {
     // Choose one random active user
     let randomUsers = []
     if (payload.text === "duo") {
-      randomUsers = await chooseActiveUsers(app, users, 4, true)
+      // Choose all active users of the channel
+      randomUsers = filterUsersByChannel(app, users, payload.channel_id)
     } else {
       randomUsers = [requestingUser].concat(await chooseActiveUsers(app, users, 1, true))
     }
@@ -87,9 +85,12 @@ getAllUsers(app).then((users) => {
 
     console.log(`⏯  Creating random roulette between ${randomUsers.map(u => u.real_name).join(', ')}.`);
 
-    if (randomUsers.length === 4) {
-      // Create a meeting for them - First couple
-      request(meetingOptions(randomUsers[0].email), async (error, response, body) => {
+    // Pair them 2 by 2
+    while (randomUsers.length >= 4) {
+      // Take two out of the users, create a meeting
+      userA = randomUsers.pop()
+      userB = randomUsers.pop()
+      request(meetingOptions(userA.email), async (error, response, body) => {
         if (!('join_url' in body) && (message in body)) {
           respond({
             text: `There was a problem with the Zoom API: ${body.message || error}`,
@@ -99,40 +100,25 @@ getAllUsers(app).then((users) => {
         }
 
         // Send the meeting details to both in DM
-        await postZoomLinkTo(app, [randomUsers[0], randomUsers[1]], body.join_url);
-        console.log(`✅ Sent link ${body.join_url} (1/2) to ${randomUsers[0].real_name} and ${randomUsers[1].real_name}`);
-      });
-
-      // Create a meeting for them - Second couple
-      request(meetingOptions(randomUsers[2].email), async (error, response, body) => {
-        if (!('join_url' in body) && (message in body)) {
-          respond({
-            text: `There was a problem with the Zoom API: ${body.message || error}`,
-            response_type: 'ephemeral'
-          })
-          return
-        }
-
-        // Send the meeting details to both in DM
-        await postZoomLinkTo(app, [randomUsers[2], randomUsers[3]], body.join_url);
-        console.log(`✅ Sent link ${body.join_url} (2/2) to ${randomUsers[2].real_name} and ${randomUsers[3].real_name}`);
-      });
-    } else {
-      // Create a meeting for all
-      request(meetingOptions(randomUsers[0].email), async (error, response, body) => {
-        if (!('join_url' in body) && (message in body)) {
-          respond({
-            text: `There was a problem with the Zoom API: ${body.message || error}`,
-            response_type: 'ephemeral'
-          })
-          return
-        }
-
-        // Send the meeting details to both in DM
-        await postZoomLinkTo(app, randomUsers, body.join_url);
-        console.log(`✅ Sent link ${body.join_url} to ${randomUsers.map(u => u.real_name).join(', ')}`);
+        await postZoomLinkTo(app, [userA, userB], body.join_url);
+        console.log(`✅ Sent link ${body.join_url} to ${userA.real_name} and ${userB.real_name}`);
       });
     }
+
+    // finally, remaining duo or trio
+    request(meetingOptions(randomUsers[0].email), async (error, response, body) => {
+      if (!('join_url' in body) && (message in body)) {
+        respond({
+          text: `There was a problem with the Zoom API: ${body.message || error}`,
+          response_type: 'ephemeral'
+        })
+        return
+      }
+
+      // Send the meeting details to both in DM
+      await postZoomLinkTo(app, randomUsers, body.join_url);
+      console.log(`✅ Sent link ${body.join_url} to ${randomUsers.map(u => u.real_name).join(', ')}`);
+    });
 
     respond({
       text: `Creating random roulette between ${randomUsers.map(u => u.real_name).join(', ')}. They have been notified!`,
