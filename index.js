@@ -2,7 +2,7 @@ const request = require('request');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken')
 const { App, LogLevel } = require('@slack/bolt');
-const { getAllUsers, chooseActiveUsers, postZoomLinkTo, alertUser } = require('./utils/helpers');
+const { getAllUsers, chooseActiveUsers, postZoomLinkTo } = require('./utils/helpers');
 
 dotenv.config()
 console.log("🛠 Config read from .env file")
@@ -52,7 +52,7 @@ getAllUsers(app).then((users) => {
   console.log(`👪 We have ${users.length} users in the workspace`)
   //console.log(users.map(u => u.real_name))
 
-  app.command('/roulette', async ({ack, payload }) => {
+  app.command('/roulette', async ({ack, respond, payload }) => {
     ack();
 
     const isDuo = (payload.text === "duo")
@@ -61,7 +61,10 @@ getAllUsers(app).then((users) => {
     const requestingUser = users.find(u => u.id === payload.user_id);
 
     if (!requestingUser) {
-      alertUser(app, payload.channel_id, payload.user_id, 'You are not allowed to run this command.')
+      respond({
+        message: 'You are not allowed to run this command.',
+        response_type: 'ephemeral'
+      });
     }
 
     console.log(`⏩ Received a /roulette command from ${requestingUser.real_name} (${payload.user_id}) in ${payload.channel_name} (${payload.channel_id})`);
@@ -71,21 +74,27 @@ getAllUsers(app).then((users) => {
     if (payload.text === "duo") {
       randomUsers = await chooseActiveUsers(app, users, 4, true)
     } else {
-      randomUsers = [requestingUser, await chooseActiveUsers(app, users, 1, true)]
+      randomUsers = [requestingUser].concat(await chooseActiveUsers(app, users, 1, true))
     }
 
     if (randomUsers.length < 2) {
-      alertUser(app, payload.channel_id, payload.user_id, 'Il n\'a pas assez d\'utilisateurs actifs. Tentez plus tard!')
+      respond({
+        message: 'Il n\'a pas assez d\'utilisateurs actifs. Tentez plus tard!',
+        response_type: 'ephemeral'
+      });
       return
     }
-
-    alertUser(app, payload.channel_id, payload.user_id, `⏯ Creating random roulette between ${randomUsers.map(u => u.real_name).join(', ')}`)
+    console.log(randomUsers)
+    console.log(`⏩ Creating random roulette between ${randomUsers.map(u => u.real_name).join(', ')}`);
 
     if (randomUsers.length === 4) {
       // Create a meeting for them - First couple
       request(meetingOptions(randomUsers[0].email), async (error, response, body) => {
         if (error) {
-          alertUser(app, payload.channel_id, payload.user_id, 'You have reached the API limit of 100 meetings / day. See you tomorrow!')
+          respond({
+            message: 'You have reached the API limit of 100 meetings / day. See you tomorrow!',
+            response_type: 'ephemeral'
+          })
           return
         }
 
@@ -97,7 +106,10 @@ getAllUsers(app).then((users) => {
       // Create a meeting for them - Second couple
       request(meetingOptions(randomUsers[2].email), async (error, response, body) => {
         if (error) {
-          alertUser(app, payload.channel_id, payload.user_id, 'You have reached the API limit of 100 meetings / day. See you tomorrow!')
+          respond({
+            message: 'You have reached the API limit of 100 meetings / day. See you tomorrow!',
+            response_type: 'ephemeral'
+          })
           return
         }
 
@@ -109,7 +121,10 @@ getAllUsers(app).then((users) => {
       // Create a meeting for all
       request(meetingOptions(randomUsers[0].email), async (error, response, body) => {
         if (error) {
-          alertUser(app, payload.channel_id, payload.user_id, 'You have reached the API limit of 100 meetings / day. See you tomorrow!')
+          respond({
+            message: 'You have reached the API limit of 100 meetings / day. See you tomorrow!',
+            response_type: 'ephemeral'
+          })
           return
         }
 
@@ -119,6 +134,10 @@ getAllUsers(app).then((users) => {
       });
     }
 
+    respond({
+      message: `Creating random roulette between ${randomUsers.map(u => u.real_name).join(', ')}`,
+      response_type: 'ephemeral'
+    })
   });
 });
 
