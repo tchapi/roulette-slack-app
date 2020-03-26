@@ -84,15 +84,15 @@ getAllUsers(app).then((users) => {
       });
       return
     }
-    console.log(randomUsers)
-    console.log(`⏩ Creating random roulette between ${randomUsers.map(u => u.real_name).join(', ')}`);
+
+    console.log(`⏯  Creating random roulette between ${randomUsers.map(u => u.real_name).join(', ')}.`);
 
     if (randomUsers.length === 4) {
       // Create a meeting for them - First couple
       request(meetingOptions(randomUsers[0].email), async (error, response, body) => {
-        if (error) {
+        if (!('join_url' in body) && (message in body)) {
           respond({
-            text: 'You have reached the API limit of 100 meetings / day. See you tomorrow!',
+            text: `There was a problem with the Zoom API: ${body.message || error}`,
             response_type: 'ephemeral'
           })
           return
@@ -105,9 +105,9 @@ getAllUsers(app).then((users) => {
 
       // Create a meeting for them - Second couple
       request(meetingOptions(randomUsers[2].email), async (error, response, body) => {
-        if (error) {
+        if (!('join_url' in body) && (message in body)) {
           respond({
-            text: 'You have reached the API limit of 100 meetings / day. See you tomorrow!',
+            text: `There was a problem with the Zoom API: ${body.message || error}`,
             response_type: 'ephemeral'
           })
           return
@@ -120,9 +120,9 @@ getAllUsers(app).then((users) => {
     } else {
       // Create a meeting for all
       request(meetingOptions(randomUsers[0].email), async (error, response, body) => {
-        if (error) {
+        if (!('join_url' in body) && (message in body)) {
           respond({
-            text: 'You have reached the API limit of 100 meetings / day. See you tomorrow!',
+            text: `There was a problem with the Zoom API: ${body.message || error}`,
             response_type: 'ephemeral'
           })
           return
@@ -135,7 +135,7 @@ getAllUsers(app).then((users) => {
     }
 
     respond({
-      text: `Creating random roulette between ${randomUsers.map(u => u.real_name).join(', ')}`,
+      text: `Creating random roulette between ${randomUsers.map(u => u.real_name).join(', ')}. They have been notified!`,
       response_type: 'ephemeral'
     })
   });

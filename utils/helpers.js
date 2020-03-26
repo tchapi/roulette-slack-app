@@ -65,12 +65,12 @@ const postZoomLinkTo = async (app, userList, link) => {
     for (var user of userList) {
       const pairedNames = userList.filter(u => u.id !== user.id).map(u => u.real_name).join(', ')
       try {
-        // const result = await app.client.chat.postMessage({
-        //   token: process.env.SLACK_BOT_TOKEN,
-        //   channel: user.id,
-        //   text: `Ready for your chat with *${pairedNames}*? See you there: <${link}> !`
-        // });
-        console.log(`🗯  Ready for your chat with *${pairedNames}*? See you there: <${link}> !`)
+        const result = await app.client.chat.postMessage({
+          token: process.env.SLACK_BOT_TOKEN,
+          channel: user.id,
+          text: `Ready for your chat with *${pairedNames}*? See you there: ${link}!`
+        });
+        console.log(`🗯  ${user.real_name}: Ready for your chat with *${pairedNames}*? See you there: ${link}!`)
         //console.log(result);
       }
       catch (error) {
