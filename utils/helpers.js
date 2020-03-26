@@ -81,12 +81,12 @@ const postZoomLinkTo = async (app, userList, link) => {
 
 const alertUser = async (app, channel, user, text) => {
     try {
-      // const result = await app.client.chat.postEphemeral({
-      //   token: process.env.SLACK_BOT_TOKEN,
-      //   user: user,
-      //   channel: channel,
-      //   text: text
-      // });
+      const result = await app.client.chat.postEphemeral({
+        token: process.env.SLACK_BOT_TOKEN,
+        user: user,
+        channel: channel,
+        text: text
+      });
       console.log(`🗯 ALERT to ${user} in ${channel}: ${text}`)
       //console.log(result);
     }

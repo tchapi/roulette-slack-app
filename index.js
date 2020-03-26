@@ -52,47 +52,29 @@ getAllUsers(app).then((users) => {
   console.log(`👪 We have ${users.length} users in the workspace`)
   //console.log(users.map(u => u.real_name))
 
-  app.command('roulette', async ({ command, ack, payload }) => {
+  app.command('/roulette', async ({ack, payload }) => {
     ack();
 
-    console.log(command);
+    const isDuo = (payload.text === "duo")
 
     // Find requesting user
-    const requestingUser = users.find(u => u.id === payload.user);
+    const requestingUser = users.find(u => u.id === payload.user_id);
     console.log(`⏩ Received a /roulette command from ${requestingUser.real_name}`);
 
     // Choose one random active user
-    const randomUsers = await chooseActiveUsers(app, users, 1, true)
-
-    // Create a meeting for them
-    request(meetingOptions(requestingUser.email), async (error, response, body) => {
-      if (error) {
-        alertUser(app, payload.channel, payload.user, 'You have reached the API limit of 100 meetings / day. See you tomorrow!')
-        return
-      }
-      // Send the meeting details to both in DM
-      await postZoomLinkTo(app, [requestingUser, randomUsers[0]], body.join_url);
-      console.log(`✅ Sent link ${body.join_url} to ${requestingUser.real_name} and ${randomUsers[0].real_name}`);
-    });
-  });
-
-  app.command('roulette-4', async ({ ack, payload }) => {
-    ack();
-
-    // Find requesting user
-    const requestingUser = users.find(u => u.id === payload.user);
-    console.log(`⏩ Received a /roulette-4 command from ${requestingUser.real_name}`);
-
-    // Choose four random active user in the channel
-    const randomUsers = await chooseActiveUsers(app, users, 4, true)
+    if (payload.text === "duo") {
+      const randomUsers = await chooseActiveUsers(app, users, 4, true)
+    } else {
+      const randomUsers = [requestingUser, await chooseActiveUsers(app, users, 1, true)]
+    }
 
     if (randomUsers.length === 1) {
-      alertUser(app, payload.channel, payload.user, 'Il n\'a qu\'un seul utilisateur actif. Tentez plus tard!')
+      alertUser(app, payload.channel_id, payload.user_id, 'Il n\'a qu\'un seul utilisateur actif. Tentez plus tard!')
     } else if (randomUsers.length === 4) {
       // Create a meeting for them - First couple
       request(meetingOptions(randomUsers[0].email), async (error, response, body) => {
         if (error) {
-          alertUser(app, payload.channel, payload.user, 'You have reached the API limit of 100 meetings / day. See you tomorrow!')
+          alertUser(app, payload.channel_id, payload.user_id, 'You have reached the API limit of 100 meetings / day. See you tomorrow!')
           return
         }
 
@@ -104,7 +86,7 @@ getAllUsers(app).then((users) => {
       // Create a meeting for them - Second couple
       request(meetingOptions(randomUsers[2].email), async (error, response, body) => {
         if (error) {
-          alertUser(app, payload.channel, payload.user, 'You have reached the API limit of 100 meetings / day. See you tomorrow!')
+          alertUser(app, payload.channel_id, payload.user_id, 'You have reached the API limit of 100 meetings / day. See you tomorrow!')
           return
         }
 
@@ -116,15 +98,18 @@ getAllUsers(app).then((users) => {
       // Create a meeting for all
       request(meetingOptions(randomUsers[0].email), async (error, response, body) => {
         if (error) {
-          alertUser(app, payload.channel, payload.user, 'You have reached the API limit of 100 meetings / day. See you tomorrow!')
+          alertUser(app, payload.channel_id, payload.user_id, 'You have reached the API limit of 100 meetings / day. See you tomorrow!')
           return
         }
 
         // Send the meeting details to both in DM
         await postZoomLinkTo(app, randomUsers, body.join_url);
-        console.log(`✅ Sent link ${body.join_url} to ${randomUsers.length} users`);
+        console.log(`✅ Sent link ${body.join_url} to ${randomUsers.map(u => u.real_name).join(', ')}`);
       });
     }
+
+    alertUser(app, payload.channel_id, payload.user_id, `Random roulette created between ${randomUsers.map(u => u.real_name).join(', ')}`)
+
   });
 });
 
