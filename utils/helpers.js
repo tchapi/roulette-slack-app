@@ -68,9 +68,9 @@ const postZoomLinkTo = async (app, userList, link) => {
         const result = await app.client.chat.postMessage({
           token: process.env.SLACK_BOT_TOKEN,
           channel: user.id,
-          text: `Ready for your chat with *${pairedNames}*? See you there: ${link}!`
+          text: `Ready for your chat with *${pairedNames}*? See you there: ${link}`
         });
-        console.log(`🗯  ${user.real_name}: Ready for your chat with *${pairedNames}*? See you there: ${link}!`)
+        console.log(`🗯  ${user.real_name}: Ready for your chat with *${pairedNames}*? See you there: ${link}`)
         //console.log(result);
       }
       catch (error) {

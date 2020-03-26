@@ -10,7 +10,7 @@ console.log("🛠 Config read from .env file")
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
   signingSecret: process.env.SLACK_SIGNING_SECRET,
-  logLevel: LogLevel.DEBUG,
+  logLevel: LogLevel.INFO,
   // endpoints: { // Just for reference since there is no documentation for that
   //   events: '/slack/events',
   //   commands: '/slack/events' 
