@@ -62,7 +62,7 @@ getAllUsers(app).then((users) => {
 
     if (!requestingUser) {
       respond({
-        message: 'You are not allowed to run this command.',
+        text: 'You are not allowed to run this command.',
         response_type: 'ephemeral'
       });
     }
@@ -79,7 +79,7 @@ getAllUsers(app).then((users) => {
 
     if (randomUsers.length < 2) {
       respond({
-        message: 'Il n\'a pas assez d\'utilisateurs actifs. Tentez plus tard!',
+        text: 'Il n\'a pas assez d\'utilisateurs actifs. Tentez plus tard!',
         response_type: 'ephemeral'
       });
       return
@@ -92,7 +92,7 @@ getAllUsers(app).then((users) => {
       request(meetingOptions(randomUsers[0].email), async (error, response, body) => {
         if (error) {
           respond({
-            message: 'You have reached the API limit of 100 meetings / day. See you tomorrow!',
+            text: 'You have reached the API limit of 100 meetings / day. See you tomorrow!',
             response_type: 'ephemeral'
           })
           return
@@ -107,7 +107,7 @@ getAllUsers(app).then((users) => {
       request(meetingOptions(randomUsers[2].email), async (error, response, body) => {
         if (error) {
           respond({
-            message: 'You have reached the API limit of 100 meetings / day. See you tomorrow!',
+            text: 'You have reached the API limit of 100 meetings / day. See you tomorrow!',
             response_type: 'ephemeral'
           })
           return
@@ -122,7 +122,7 @@ getAllUsers(app).then((users) => {
       request(meetingOptions(randomUsers[0].email), async (error, response, body) => {
         if (error) {
           respond({
-            message: 'You have reached the API limit of 100 meetings / day. See you tomorrow!',
+            text: 'You have reached the API limit of 100 meetings / day. See you tomorrow!',
             response_type: 'ephemeral'
           })
           return
@@ -135,7 +135,7 @@ getAllUsers(app).then((users) => {
     }
 
     respond({
-      message: `Creating random roulette between ${randomUsers.map(u => u.real_name).join(', ')}`,
+      text: `Creating random roulette between ${randomUsers.map(u => u.real_name).join(', ')}`,
       response_type: 'ephemeral'
     })
   });
