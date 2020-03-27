@@ -72,7 +72,8 @@ getAllUsers(app).then((users) => {
       return
     }
 
-    console.log(`⏩ Received a /roulette command from ${requestingUser.real_name} (${payload.user_id}) in ${payload.channel_name} (${payload.channel_id})`);
+    console.log(new Date().toISOString())
+    console.log(`⏩ Received a /roulette${payload.text?' '+payload.text:''} command from ${requestingUser.real_name} (${payload.user_id}) in ${payload.channel_name} (${payload.channel_id})`);
 
     // Choose one random active user
     let randomUsers = []
