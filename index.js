@@ -93,7 +93,8 @@ getAllUsers(app).then((users) => {
       return
     }
 
-    console.log(`⏯  Creating random roulette between ${randomUsers.map(u => u.real_name).join(', ')}.`);
+    const names = randomUsers.map(u => u.real_name).join(', ')
+    console.log(`⏯  Creating random roulette between ${names}.`);
 
     // Pair them 2 by 2
     let userA = null
@@ -135,7 +136,7 @@ getAllUsers(app).then((users) => {
     });
 
     respond({
-      text: `Creating random roulette between ${randomUsers.map(u => u.real_name).join(', ')}. They have been notified!`,
+      text: `Creating random roulette between ${names}. They have been notified!`,
       response_type: 'ephemeral'
     })
   });
